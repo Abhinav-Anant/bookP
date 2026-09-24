@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The mark on dark surfaces. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:strokeColor="#F2C14E" android:strokeWidth="4" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M54,45 C59,37 71,36 71,45 C71,54 59,53 54,45 C49,37 37,36 37,45 C37,54 49,53 54,45 Z" />
+    <path android:fillColor="#D0B3F5" android:pathData="M53,60 C47,55 39,54 30,56 L30,70 C39,68 47,69 53,74 Z" />
+    <path android:fillColor="#D0B3F5" android:pathData="M55,60 C61,55 69,54 78,56 L78,70 C69,68 61,69 55,74 Z" />
+</vector>

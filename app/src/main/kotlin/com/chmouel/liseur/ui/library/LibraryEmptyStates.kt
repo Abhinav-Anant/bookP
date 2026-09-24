@@ -296,6 +296,7 @@ internal fun EmptyLibrary(
     offerFreeBooks: Boolean = false,
     connectingFreeBooks: Boolean = false,
     onStartWithFreeBooks: () -> Unit = {},
+    onOpenStore: (() -> Unit)? = null,
 ) {
     // Which cut of the mark to draw is asked of the theme in force
     // here, not of a -night qualifier: those follow the system, and the
@@ -336,11 +337,12 @@ internal fun EmptyLibrary(
             onClick = onAddBook,
             modifier = Modifier.entrance(delayMillis = 3 * ENTRANCE_STEP_MS),
         )
+        // Signed in to APA, the server is already chosen: point at the store.
         LibraryActionCard(
             icon = Icons.Outlined.CloudQueue,
-            title = stringResource(R.string.connect_server),
-            hint = stringResource(R.string.connect_server_hint),
-            onClick = onConnectServer,
+            title = stringResource(if (onOpenStore != null) R.string.apa_browse_store else R.string.connect_server),
+            hint = stringResource(if (onOpenStore != null) R.string.apa_browse_store_hint else R.string.connect_server_hint),
+            onClick = onOpenStore ?: onConnectServer,
             modifier = Modifier.entrance(delayMillis = 4 * ENTRANCE_STEP_MS),
         )
         if (offerFreeBooks) {

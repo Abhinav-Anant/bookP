@@ -2,6 +2,7 @@ package com.chmouel.liseur.domain
 
 import com.chmouel.liseur.data.db.Book
 import com.chmouel.liseur.data.db.DownloadState
+import com.chmouel.liseur.data.remote.ServerKind
 
 /**
  * The axis a filter narrows.
@@ -26,6 +27,9 @@ enum class FilterGroup {
      * something else.
      */
     PLACE,
+
+    /** Books the reader starred in the APA cloud. */
+    COLLECTION,
 }
 
 /** One tickable way of narrowing the library. */
@@ -42,6 +46,7 @@ enum class LibraryFilterOption(val id: String, val group: FilterGroup) {
 
     /** The books archived. */
     ARCHIVED("archived", FilterGroup.PLACE),
+    FAVORITES("favorites", FilterGroup.COLLECTION),
     ;
 
     companion object {
@@ -97,6 +102,8 @@ fun startedAfter(pageCount: Int?): Double {
 data class LibraryFilters(
     val options: Set<LibraryFilterOption> = emptySet(),
     val groupBySeries: Boolean = false,
+    /** APA book ids the reader marked as favourites; see [LibraryFilterOption.FAVORITES]. */
+    val favoriteIds: Set<String> = emptySet(),
 ) {
     /** Whether the archive is being looked at rather than the shelf. */
     val archived: Boolean get() = LibraryFilterOption.ARCHIVED in options
@@ -142,6 +149,11 @@ data class LibraryFilters(
         // the rest: an archived book is out of every view but its own,
         // however well it matches the others.
         if (book.archived != archived) return false
+        if (LibraryFilterOption.FAVORITES in options &&
+            ServerKind.KOMGA.remoteId(book.url) !in favoriteIds
+        ) {
+            return false
+        }
 
         val availability = group(FilterGroup.AVAILABILITY)
         if (availability.isNotEmpty()) {

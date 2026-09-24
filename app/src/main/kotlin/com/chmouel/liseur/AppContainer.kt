@@ -1,82 +1,93 @@
 package com.chmouel.liseur
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Room
 import androidx.room.withTransaction
 import com.chmouel.liseur.data.AndroidNetworkAvailability
+import com.chmouel.liseur.data.apa.ApaAuthClient
+import com.chmouel.liseur.data.apa.ApaConfig
+import com.chmouel.liseur.data.apa.ApaDiscoverClient
+import com.chmouel.liseur.data.apa.ApaVaultKey
+import com.chmouel.liseur.data.apa.BookVault
+import com.chmouel.liseur.data.apa.VaultResourceFactory
 import com.chmouel.liseur.data.calibre.BookDownloadRepository
+import com.chmouel.liseur.data.calibre.BulkDownloadStore
 import com.chmouel.liseur.data.calibre.CalibreCatalogClient
 import com.chmouel.liseur.data.calibre.CalibreFileSource
 import com.chmouel.liseur.data.calibre.KoboSyncRepository
-import com.chmouel.liseur.data.calibre.BulkDownloadStore
+import com.chmouel.liseur.data.db.LiseurDatabase
 import com.chmouel.liseur.data.komga.KomgaCatalogClient
 import com.chmouel.liseur.data.komga.KomgaFileSource
 import com.chmouel.liseur.data.komga.KomgaSyncRepository
-import com.chmouel.liseur.data.db.LiseurDatabase
-import com.chmouel.liseur.data.library.FinishedState
+import com.chmouel.liseur.data.kosync.KosyncAccountRepository
+import com.chmouel.liseur.data.kosync.KosyncPositionSync
 import com.chmouel.liseur.data.library.AnnotationBackupRepository
 import com.chmouel.liseur.data.library.BookFingerprintStore
 import com.chmouel.liseur.data.library.BookRemoval
+import com.chmouel.liseur.data.library.FinishedState
 import com.chmouel.liseur.data.library.LocalLibraryRepository
 import com.chmouel.liseur.data.library.ReadingSessionManager
-import com.chmouel.liseur.data.settings.AppSettingsRepository
-import com.chmouel.liseur.data.settings.ReaderPreferencesRepository
-import com.chmouel.liseur.data.settings.ReadingPaceRepository
-import com.chmouel.liseur.data.settings.UserFontRepository
-import com.chmouel.liseur.data.remote.DeviceIdentityRepository
-import com.chmouel.liseur.data.remote.BookUploadRepository
-import com.chmouel.liseur.data.remote.UploadPrompts
-import com.chmouel.liseur.data.remote.CompositePositionSync
-import com.chmouel.liseur.data.remote.AndroidLocalNetworkAccess
-import com.chmouel.liseur.data.remote.LocalNetworkGuardedSync
 import com.chmouel.liseur.data.liseursync.LiseurSyncAnnotations
-import com.chmouel.liseur.data.liseursync.LiseurSyncSettings
 import com.chmouel.liseur.data.liseursync.LiseurSyncCatalogClient
 import com.chmouel.liseur.data.liseursync.LiseurSyncDeleteClient
 import com.chmouel.liseur.data.liseursync.LiseurSyncFileSource
 import com.chmouel.liseur.data.liseursync.LiseurSyncInsights
-import com.chmouel.liseur.data.liseursync.LiseurSyncSnapshots
 import com.chmouel.liseur.data.liseursync.LiseurSyncLive
 import com.chmouel.liseur.data.liseursync.LiseurSyncPositionSync
-import com.chmouel.liseur.data.liseursync.LiseurSyncServerSetup
 import com.chmouel.liseur.data.liseursync.LiseurSyncSeriesClient
+import com.chmouel.liseur.data.liseursync.LiseurSyncServerSetup
+import com.chmouel.liseur.data.liseursync.LiseurSyncSettings
+import com.chmouel.liseur.data.liseursync.LiseurSyncSnapshots
 import com.chmouel.liseur.data.liseursync.LiseurSyncUploadClient
 import com.chmouel.liseur.data.liseursync.WorkResolver
-import com.chmouel.liseur.data.kosync.KosyncAccountRepository
-import com.chmouel.liseur.data.kosync.KosyncPositionSync
-import com.chmouel.liseur.data.remote.RemoteAccountRepository
+import com.chmouel.liseur.data.remote.AndroidLocalNetworkAccess
+import com.chmouel.liseur.data.remote.BookUploadRepository
+import com.chmouel.liseur.data.remote.CompositePositionSync
+import com.chmouel.liseur.data.remote.DeviceIdentityRepository
 import com.chmouel.liseur.data.remote.LiveIdentity
 import com.chmouel.liseur.data.remote.LiveRefresh
 import com.chmouel.liseur.data.remote.LiveTopic
+import com.chmouel.liseur.data.remote.LocalNetworkGuardedSync
+import com.chmouel.liseur.data.remote.RemoteAccountRepository
 import com.chmouel.liseur.data.remote.RemoteCatalogRepository
-import com.chmouel.liseur.data.remote.SeriesExtrasRepository
+import com.chmouel.liseur.data.remote.RemoteHttp
 import com.chmouel.liseur.data.remote.RemoteRouter
 import com.chmouel.liseur.data.remote.RoutedPositionSync
+import com.chmouel.liseur.data.remote.SeriesExtrasRepository
 import com.chmouel.liseur.data.remote.ServerKind
 import com.chmouel.liseur.data.remote.SyncReporting
-import com.chmouel.liseur.reader.ReaderPresence
+import com.chmouel.liseur.data.remote.UploadPrompts
+import com.chmouel.liseur.data.settings.AppSettingsRepository
+import com.chmouel.liseur.data.settings.ReaderPreferencesRepository
+import com.chmouel.liseur.data.settings.ReadingPaceRepository
+import com.chmouel.liseur.data.settings.SessionStateRepository
 import com.chmouel.liseur.data.settings.SettingsChangeTracker
 import com.chmouel.liseur.data.settings.SettingsSyncRepository
+import com.chmouel.liseur.data.settings.UserFontRepository
 import com.chmouel.liseur.data.settings.syncableSettings
-import com.chmouel.liseur.data.settings.SessionStateRepository
-import com.chmouel.liseur.sync.PositionSyncCoordinator
+import com.chmouel.liseur.reader.ReaderPresence
 import com.chmouel.liseur.sync.LatestPositionSync
 import com.chmouel.liseur.sync.LiveSyncConnector
+import com.chmouel.liseur.sync.PositionSyncCoordinator
 import com.chmouel.liseur.sync.PositionSyncWorker
 import com.chmouel.liseur.sync.ReadingPositionPublisher
+import com.chmouel.liseur.sync.SyncScope
 import com.chmouel.liseur.ui.eink.EInkDisplay
 import com.chmouel.liseur.ui.eink.OnyxEInkDisplay
-import com.chmouel.liseur.sync.SyncScope
-import android.util.Log
-import org.readium.r2.shared.util.asset.AssetRetriever
-import org.readium.r2.shared.util.http.DefaultHttpClient
-import org.readium.r2.streamer.PublicationOpener
-import org.readium.r2.streamer.parser.DefaultPublicationParser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.readium.adapter.pdfium.document.PdfiumDocumentFactory
+import org.readium.r2.shared.util.asset.AssetRetriever
+import org.readium.r2.shared.util.asset.DefaultArchiveOpener
+import org.readium.r2.shared.util.asset.DefaultFormatSniffer
+import org.readium.r2.shared.util.asset.DefaultResourceFactory
+import org.readium.r2.shared.util.http.DefaultHttpClient
+import org.readium.r2.streamer.PublicationOpener
+import org.readium.r2.streamer.parser.DefaultPublicationParser
 
 /**
  * Manual composition root: shared Readium services and app-wide
@@ -96,14 +107,23 @@ class AppContainer(context: Context) {
     private val httpClient = DefaultHttpClient()
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    val assetRetriever = AssetRetriever(context.contentResolver, httpClient)
+    /** Downloaded books are sealed on disk; see [BookVault]. */
+    val bookVault = BookVault { ApaVaultKey.streamingAead(context.applicationContext) }
+
+    // Readium's usual factories, with the vault in front so sealed books
+    // open everywhere Readium is asked for one.
+    val assetRetriever = AssetRetriever(
+        DefaultResourceFactory(context.contentResolver, httpClient, listOf(VaultResourceFactory(bookVault))),
+        DefaultArchiveOpener(),
+        DefaultFormatSniffer(),
+    )
 
     val publicationOpener = PublicationOpener(
         publicationParser = DefaultPublicationParser(
             context,
             httpClient = httpClient,
             assetRetriever = assetRetriever,
-            pdfFactory = null,
+            pdfFactory = PdfiumDocumentFactory(context.applicationContext),
         ),
     )
 
@@ -554,6 +574,16 @@ class AppContainer(context: Context) {
         account = remoteAccount,
         dao = database.seriesExtraDao(),
         networkAvailability = networkAvailability,
+    )
+
+    val apaAuth = ApaAuthClient(ApaConfig.supabaseUrl, ApaConfig.anonKey, RemoteHttp.default())
+
+    /** APA favourite ids, shared by the Home, book and library screens. */
+    val apaFavorites = MutableStateFlow<Set<String>>(emptySet())
+
+    val apaDiscover = ApaDiscoverClient(
+        connection = { ApaConfig.connectionOf(database.remoteServerDao().get()) },
+        http = RemoteHttp.default(),
     )
 }
 

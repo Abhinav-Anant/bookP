@@ -8,6 +8,9 @@ import androidx.work.WorkerParameters
 import com.chmouel.liseur.container
 import com.chmouel.liseur.data.db.DownloadState
 import com.chmouel.liseur.data.remote.RemoteHttp
+import com.chmouel.liseur.reader.BookFormat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.readium.r2.shared.util.AbsoluteUrl
 
 /**
@@ -117,6 +120,16 @@ class BookDownloadWorker(
 
         return when (outcome) {
             is DownloadOutcome.Done -> {
+                // APA: books are only readable inside the app, so the file
+                // is sealed before anything is told it has arrived.
+                val file = downloads.fileFor(uuid)
+                val sealed = withContext(Dispatchers.IO) {
+                    runCatching { container.bookVault.seal(file, BookFormat.sniff(file)) }
+                }
+                if (sealed.isFailure) {
+                    file.delete()
+                    return Result.retry()
+                }
                 val localUri = downloads.localUriFor(uuid)
                 bookDao.setDownloadState(
                     bookUrl,

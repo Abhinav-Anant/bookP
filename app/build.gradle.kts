@@ -43,11 +43,20 @@ android {
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.chmouel.liseur"
+        applicationId = "in.anant.apa"
         minSdk = 26
         targetSdk = 37
-        versionCode = 43
-        versionName = "0.18.0"
+        versionCode = 1
+        versionName = "0.1.0"
+
+        // APA cloud settings live in local.properties, never in git.
+        val localProps = Properties().apply {
+            rootProject.file("local.properties").takeIf { it.isFile }?.inputStream()?.use(::load)
+        }
+        fun apaProp(key: String) = "\"${localProps.getProperty(key, "")}\""
+        buildConfigField("String", "APA_SUPABASE_URL", apaProp("apa.supabaseUrl"))
+        buildConfigField("String", "APA_SUPABASE_ANON_KEY", apaProp("apa.supabaseAnonKey"))
+        buildConfigField("String", "APA_GOOGLE_WEB_CLIENT_ID", apaProp("apa.googleWebClientId"))
     }
 
     signingConfigs {
@@ -106,6 +115,18 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
         // Required by the Readium toolkit.
         isCoreLibraryDesugaringEnabled = true
+    }
+
+    // ponytail: the Indian locales carry only APA's own strings so far and
+    // fall back to English for the rest; make this an error again once
+    // the full machine translation has been reviewed.
+    lint {
+        warning += "MissingTranslation"
+    }
+
+    // Lists every values-XX locale in Android's per-app language picker.
+    androidResources {
+        generateLocaleConfig = true
     }
 
     buildFeatures {
@@ -200,6 +221,9 @@ dependencies {
     implementation(libs.readium.shared)
     implementation(libs.readium.streamer)
     implementation(libs.readium.navigator)
+    // PDF books (APA); CBZ comics come with the streamer.
+    implementation(libs.readium.pdfium.document)
+    implementation(libs.readium.pdfium.navigator)
 
     // Already inside readium-navigator, which uses it to lift footnotes out
     // of a chapter. Declared here because the reader parses notes of its own
@@ -212,6 +236,12 @@ dependencies {
     ksp(libs.room.compiler)
 
     implementation(libs.okhttp)
+    // Google sign-in for the APA cloud.
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
+    implementation(libs.googleid)
+    // Book files are encrypted at rest so they can only be read in the app.
+    implementation(libs.tink.android)
     implementation(libs.okhttp.sse)
     implementation(libs.androidx.work.runtime.ktx)
 

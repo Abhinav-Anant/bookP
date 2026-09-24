@@ -9,57 +9,58 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import com.chmouel.liseur.data.settings.AppSettings
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.core.net.toUri
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.repeatOnLifecycle
-import com.chmouel.liseur.reader.chrome.BookSyncDialog
-import com.chmouel.liseur.reader.chrome.ExternalLinkDialog
-import com.chmouel.liseur.reader.chrome.PageTurner
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.chmouel.liseur.R
 import com.chmouel.liseur.container
 import com.chmouel.liseur.data.db.Book
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import com.chmouel.liseur.data.library.openableUri
+import com.chmouel.liseur.data.settings.AppSettings
 import com.chmouel.liseur.data.settings.ReaderTheme
 import com.chmouel.liseur.data.settings.UploadPolicy
 import com.chmouel.liseur.data.settings.readingCssFor
-import com.chmouel.liseur.ui.reading.FineTypographyActions
-import org.readium.r2.shared.publication.Layout
-import org.readium.r2.shared.publication.ReadingProgression as PublicationReadingProgression
+import com.chmouel.liseur.reader.chrome.BookSyncDialog
+import com.chmouel.liseur.reader.chrome.ExternalLinkDialog
+import com.chmouel.liseur.reader.chrome.PageTurner
+import com.chmouel.liseur.ui.LocalEInk
+import com.chmouel.liseur.ui.ProvideEInk
 import com.chmouel.liseur.ui.UploadBookOfferDialog
+import com.chmouel.liseur.ui.WidthClass
 import com.chmouel.liseur.ui.library.UploadDecision
 import com.chmouel.liseur.ui.library.canUploadTo
 import com.chmouel.liseur.ui.library.uploadOnOpen
+import com.chmouel.liseur.ui.reading.FineTypographyActions
 import com.chmouel.liseur.ui.theme.LiseurTheme
 import com.chmouel.liseur.ui.theme.SystemBarIcons
 import com.chmouel.liseur.ui.theme.appAccent
 import com.chmouel.liseur.ui.theme.isDark
 import com.chmouel.liseur.ui.theme.loadingAccentOn
-import org.readium.r2.navigator.preferences.ReadingProgression
-import org.readium.r2.shared.ExperimentalReadiumApi
-import com.chmouel.liseur.ui.LocalEInk
-import com.chmouel.liseur.ui.WidthClass
 import com.chmouel.liseur.ui.widthClass
-import com.chmouel.liseur.ui.ProvideEInk
+import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.readium.r2.navigator.epub.EpubNavigatorFragment
+import org.readium.r2.navigator.preferences.ReadingProgression
+import org.readium.r2.shared.ExperimentalReadiumApi
+import org.readium.r2.shared.publication.Layout
+import org.readium.r2.shared.publication.ReadingProgression as PublicationReadingProgression
 import org.readium.r2.shared.util.AbsoluteUrl
 import org.readium.r2.shared.util.toAbsoluteUrl
 
@@ -784,10 +785,17 @@ class ReaderActivity : FragmentActivity() {
             KeyEvent.KEYCODE_DPAD_UP,
         )
 
-        fun intent(context: Context, url: String, id: String = url): Intent =
-            Intent(context, ReaderActivity::class.java)
+        fun intent(context: Context, url: String, id: String = url): Intent {
+            // APA: PDFs and comics have their own, fixed-layout reader.
+            val file = url.toUri().takeIf { it.scheme == "file" }?.path?.let(::File)
+            val format = file?.let { context.container.bookVault.formatOf(it) ?: BookFormat.sniff(it) }
+            if (file != null && format != BookFormat.EPUB) {
+                return FixedLayoutReaderActivity.intent(context, url, id)
+            }
+            return Intent(context, ReaderActivity::class.java)
                 .putExtra(EXTRA_URL, url)
                 .putExtra(EXTRA_ID, id)
+        }
     }
 }
 

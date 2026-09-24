@@ -3,9 +3,9 @@
     <color name="ink">#15110C</color>
 
     <!-- The field the mark is drawn on, behind the launcher and splash
-         artwork.  Those two show the cream mark whatever the system theme
+         artwork.  Those two show the purple field whatever the system theme
          is — an icon that changes under the user is worse than one that
          does not match the wallpaper — so there is no night value here.
          Anything drawn in Compose picks its own cut instead. -->
-    <color name="logo_field">#FCF4ED</color>
+    <color name="logo_field">#6B3FA0</color>
 </resources>

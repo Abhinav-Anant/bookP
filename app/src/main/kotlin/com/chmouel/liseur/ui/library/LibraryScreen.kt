@@ -116,7 +116,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -171,6 +170,7 @@ fun LibraryScreen(
     onOpenStats: () -> Unit,
     onOpenBookStats: (Book) -> Unit,
     onConnectServer: () -> Unit,
+    onOpenStore: () -> Unit,
     onDownload: (Book) -> Unit,
     onCancelDownload: (Book) -> Unit,
     onRemoveDownload: (Book) -> Unit,
@@ -216,10 +216,6 @@ fun LibraryScreen(
     modifier: Modifier = Modifier,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    // Which cut of the reading mark to draw.  Asked of the scheme in
-    // force rather than of the resource qualifiers, so it follows the
-    // app's own dark setting even when the system disagrees.
-    val darkMark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     // The bar shows the illustration at the size the window can afford.
     val barWidth = windowWidth()
     val tileHeight = brandTileHeight(barWidth)
@@ -476,28 +472,10 @@ fun LibraryScreen(
                                 },
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                // A woman reading stretched out on her couch,
-                                // cut from the banner art — the reading mark,
-                                // in place of a plain wordmark or the launcher
-                                // icon.  Painted art with its own wall and
-                                // floor, so it is framed as a small tile
-                                // rather than knocked out to line work.
-                                //
-                                // Which cut to draw is asked of the theme in
-                                // force here, not of a -night qualifier: those
-                                // follow the system, and the app's own
-                                // light/dark setting is allowed to disagree.
+                                // The APA mark on its purple field.
                                 Image(
-                                    painter = painterResource(
-                                        if (darkMark) R.drawable.ic_reading_scene_night
-                                        else R.drawable.ic_reading_scene,
-                                    ),
+                                    painter = painterResource(R.drawable.ic_apa_tile),
                                     contentDescription = null,
-                                    // Fit, not Crop, and the frame pinned to
-                                    // the picture's own aspect: whatever
-                                    // height the bar ends up granting, the
-                                    // box can never come out wider than the
-                                    // art and take a slice off her head.
                                     contentScale = ContentScale.Fit,
                                     modifier = Modifier
                                         .height(tileHeight)
@@ -756,6 +734,7 @@ fun LibraryScreen(
                         offerFreeBooks = !state.hasServer,
                         connectingFreeBooks = state.connectingStarterCatalog,
                         onStartWithFreeBooks = { starterSheet = true },
+                        onOpenStore = onOpenStore.takeIf { state.hasApa },
                         modifier = Modifier.fillMaxSize(),
                     )
 
@@ -2014,6 +1993,7 @@ private fun LibraryFilterOption.label(): String = stringResource(
         LibraryFilterOption.IN_PROGRESS -> R.string.filter_in_progress
         LibraryFilterOption.FINISHED -> R.string.filter_finished
         LibraryFilterOption.ARCHIVED -> R.string.filter_archived
+        LibraryFilterOption.FAVORITES -> R.string.filter_favorites
     },
 )
 
@@ -2100,6 +2080,14 @@ private fun FilterMenu(
                         LibraryFilterOption.DOWNLOADED,
                         LibraryFilterOption.NOT_DOWNLOADED,
                     ),
+                    filters = filters,
+                    onToggleFilter = onToggleFilter,
+                )
+                HorizontalDivider()
+            }
+            if (state.hasApa) {
+                FilterMenuOptions(
+                    options = listOf(LibraryFilterOption.FAVORITES),
                     filters = filters,
                     onToggleFilter = onToggleFilter,
                 )

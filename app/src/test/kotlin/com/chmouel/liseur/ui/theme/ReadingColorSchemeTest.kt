@@ -395,8 +395,8 @@ class ReadingColorSchemeTest {
             Color.White to Color.Black,
             aquamarineLight to Color.White,
             aquamarineDark to Color.Black,
-            Leather to ReaderTheme.SEPIA.background,
-            LeatherNight to ReaderTheme.BLACK.background,
+            Brand to ReaderTheme.SEPIA.background,
+            BrandNight to ReaderTheme.BLACK.background,
         )
         for ((a, b) in samples) {
             assertEquals(

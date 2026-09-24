@@ -218,4 +218,27 @@ class LibraryFiltersTest {
         )
         assertEquals(emptySet<LibraryFilterOption>(), LibraryFilters.parse(null))
     }
+
+    @Test
+    fun `favourites keep only APA books the reader starred`() {
+        val starred = book().copy(url = "komga:b1")
+        val other = book().copy(url = "komga:b2")
+        val local = book().copy(url = "file:///sdcard/b1.epub")
+        val filters = LibraryFilters(
+            options = setOf(LibraryFilterOption.FAVORITES),
+            favoriteIds = setOf("b1"),
+        )
+        assertTrue(filters.accepts(starred))
+        assertFalse(filters.accepts(other))
+        assertFalse(filters.accepts(local))
+        assertTrue(LibraryFilters(favoriteIds = setOf("b1")).accepts(other))
+    }
+
+    @Test
+    fun `favourites survive a round trip through settings`() {
+        assertEquals(
+            setOf(LibraryFilterOption.FAVORITES),
+            LibraryFilters.parse(LibraryFilters(setOf(LibraryFilterOption.FAVORITES)).serialise()),
+        )
+    }
 }

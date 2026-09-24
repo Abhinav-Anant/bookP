@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The splash shows the launcher mark. -->
+    <item name="ic_splash_logo" type="drawable">@drawable/ic_launcher_foreground</item>
+</resources>

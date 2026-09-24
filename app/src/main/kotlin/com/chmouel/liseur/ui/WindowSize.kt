@@ -85,15 +85,8 @@ fun coverMinSize(width: Dp): Dp = when (widthClassOf(width)) {
     WidthClass.EXPANDED -> 156.dp
 }
 
-/**
- * Shape of the reading illustration, width over height.
- *
- * The tile is drawn against this rather than against whatever box the
- * app bar hands out: the crop it is cut from is 838×383, and a box even
- * slightly wider than that would otherwise have to lose the top and the
- * bottom of the picture to fill itself.
- */
-const val BRAND_TILE_ASPECT = 838f / 383f
+/** Shape of the brand tile in the library bar, width over height: the square APA mark. */
+const val BRAND_TILE_ASPECT = 1f
 
 /**
  * How tall the reading illustration in the library bar is drawn.

@@ -185,7 +185,7 @@ enum class DefinitionTarget(val id: String) {
  */
 data class AppSettings(
     val themeMode: ThemeMode = ThemeMode.Default,
-    val dynamicColor: Boolean = true,
+    val dynamicColor: Boolean = false,
     val volumeKeysTurnPages: Boolean = true,
     val tapZones: TapZones = TapZones.Default,
     val pinchToResize: Boolean = true,
@@ -302,7 +302,7 @@ class AppSettingsRepository(private val store: DataStore<Preferences>) {
     val settings: Flow<AppSettings> = store.data.map { p ->
         AppSettings(
             themeMode = ThemeMode.fromId(p[Keys.THEME_MODE]),
-            dynamicColor = p[Keys.DYNAMIC_COLOR] ?: true,
+            dynamicColor = p[Keys.DYNAMIC_COLOR] ?: false,
             volumeKeysTurnPages = p[Keys.VOLUME_KEYS] ?: true,
             tapZones = TapZones.fromId(p[Keys.TAP_ZONES]),
             pinchToResize = p[Keys.PINCH_TO_RESIZE] ?: true,

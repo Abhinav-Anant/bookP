@@ -1,4 +1,7 @@
 [versions]
+tink = "1.15.0"
+credentials = "1.5.0"
+googleid = "1.1.1"
 agp = "9.4.0"
 kotlinComposePlugin = "2.4.10"
 ksp = "2.3.11"
@@ -25,6 +28,10 @@ robolectric = "4.16.1"
 junit = "4.13.2"
 
 [libraries]
+tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "tink" }
+androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
+androidx-credentials-play-services = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
@@ -44,6 +51,8 @@ reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reo
 readium-shared = { module = "org.readium.kotlin-toolkit:readium-shared", version.ref = "readium" }
 readium-streamer = { module = "org.readium.kotlin-toolkit:readium-streamer", version.ref = "readium" }
 readium-navigator = { module = "org.readium.kotlin-toolkit:readium-navigator", version.ref = "readium" }
+readium-pdfium-document = { module = "org.readium.kotlin-toolkit:readium-adapter-pdfium-document", version.ref = "readium" }
+readium-pdfium-navigator = { module = "org.readium.kotlin-toolkit:readium-adapter-pdfium-navigator", version.ref = "readium" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }

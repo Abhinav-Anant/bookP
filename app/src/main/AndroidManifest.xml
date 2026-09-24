@@ -56,6 +56,13 @@
             </intent-filter>
         </activity>
 
+        <!-- PDFs and CBZ comics (APA). Not exported: books open only from the library. -->
+        <activity
+            android:name=".reader.FixedLayoutReaderActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode"
+            android:theme="@style/Theme.Liseur" />
+
         <activity
             android:name=".reader.ReaderActivity"
             android:exported="true"

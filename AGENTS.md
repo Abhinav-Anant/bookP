@@ -1,9 +1,10 @@
-# Liseur: agent instructions
+# APA (Anant Publication App): agent instructions
 
-Liseur is an open-source Android EPUB reader with local shelves and optional
-calibre-web, Komga, and liseur-sync connections. It uses Kotlin, Jetpack
-Compose, and the Readium Kotlin Toolkit. The app must remain FOSS-compatible
-with F-Droid.
+APA is Anant Publication's Android reader, forked from Liseur (MIT). It reads
+EPUB, PDF and CBZ, and its cloud library is a Supabase backend (`supabase/`)
+that the app talks to as a Komga-compatible server. It uses Kotlin, Jetpack
+Compose, and the Readium Kotlin Toolkit. APA ships on Google Play, not
+F-Droid.
 
 `DEVELOPER.md` is the detailed source of truth for architecture, provider
 protocols, synchronization invariants, reader behavior, testing procedures,
@@ -37,7 +38,7 @@ more than one device is attached. Treat any serial that is not
 
 Never install over, uninstall, clear, or modify the database of a real phone
 without asking first. `make dev-install` is safe from the production app's
-data because the dev package is `com.chmouel.liseur.dev`, but it is still an
+data because the dev package is `in.anant.apa.dev`, but it is still an
 installation on a real device and must be announced.
 
 ## Repository workflow
@@ -58,14 +59,18 @@ installation on a real device and must be announced.
 
 ## Non-negotiable constraints
 
-- Every dependency must be FOSS and come from Maven Central or Google's Maven
-  repository. Never add `readium-lcp`, proprietary blobs, trackers,
-  analytics, Google Play services, or unapproved network endpoints.
+- Dependencies come from Maven Central or Google's Maven repository; the one
+  exception is `com.github.marain87` (PdfiumAndroid, for Readium's PDF
+  adapter) from JitPack, fenced to that group in `settings.gradle.kts`. Google
+  Play services (Credential Manager for Google sign-in) are allowed. Never add
+  trackers or network endpoints other than the configured Supabase project.
 - Preserve release reproducibility. Do not remove the `dependenciesInfo` or
   `packaging.jniLibs.keepDebugSymbols` settings in
   `app/build.gradle.kts`; see [DEVELOPER.md](DEVELOPER.md#f-droid-readiness).
-- User-facing UI text belongs in the English resource file and in the French,
-  Spanish, Russian, Italian, and German resources in the same change. Use
+- User-facing UI text belongs in the English resource file and in the Hindi,
+  Marathi, Bengali, Gujarati, Tamil, Telugu, Kannada, Malayalam and Punjabi
+  resources in the same change (French, Spanish, Russian, Italian and German
+  remain from upstream and should be kept in step). Use
   `stringResource` or `pluralStringResource`, mark brand names
   `translatable="false"`, and preserve Russian plural categories. See
   [DEVELOPER.md](DEVELOPER.md#translations).

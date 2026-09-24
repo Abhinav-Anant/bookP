@@ -1,88 +1,110 @@
 package com.chmouel.liseur
 
 import android.app.ActivityOptions
-import android.content.Intent
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.LibraryBooks
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.Stable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.stringResource
+import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.lifecycleScope
-import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.chmouel.liseur.data.apa.ApaConfig
 import com.chmouel.liseur.data.library.BackupResult
 import com.chmouel.liseur.data.library.BackupSummary
 import com.chmouel.liseur.data.library.Inspection
+import com.chmouel.liseur.data.library.openableUri
+import com.chmouel.liseur.data.settings.AppSettings
+import com.chmouel.liseur.data.settings.ReaderPrefs
 import com.chmouel.liseur.domain.ResumeCandidate
-import com.chmouel.liseur.domain.shouldResume
-import com.chmouel.liseur.reader.ReaderActivity
-import kotlinx.coroutines.launch
-import androidx.compose.runtime.saveable.listSaver
+import com.chmouel.liseur.domain.SeriesShelf
 import com.chmouel.liseur.domain.displayTitle
 import com.chmouel.liseur.domain.localeWeekStart
-import com.chmouel.liseur.ui.reading.FineTypographyActions
-import com.chmouel.liseur.ui.stats.BookReadingStatsScreen
-import com.chmouel.liseur.ui.stats.ReadingStatsScreen
-import com.chmouel.liseur.ui.stats.ReadingStatsViewModel
+import com.chmouel.liseur.domain.shouldResume
+import com.chmouel.liseur.reader.ReaderActivity
+import com.chmouel.liseur.ui.LocalEInk
+import com.chmouel.liseur.ui.ProvideEInk
+import com.chmouel.liseur.ui.apa.ApaBookDetailScreen
+import com.chmouel.liseur.ui.apa.ApaDevicesScreen
+import com.chmouel.liseur.ui.apa.ApaHomeScreen
+import com.chmouel.liseur.ui.apa.ApaSignInScreen
+import com.chmouel.liseur.ui.apa.BookDetailViewModel
+import com.chmouel.liseur.ui.apa.HomeViewModel
+import com.chmouel.liseur.ui.apa.SignInViewModel
 import com.chmouel.liseur.ui.library.BookActionsSheet
 import com.chmouel.liseur.ui.library.ConfirmLocalDeleteDialog
 import com.chmouel.liseur.ui.library.ConfirmRemoveDownloadDialog
 import com.chmouel.liseur.ui.library.ConfirmRemoveFromLibraryDialog
 import com.chmouel.liseur.ui.library.ConfirmServerDeleteDialog
 import com.chmouel.liseur.ui.library.LibraryScreen
+import com.chmouel.liseur.ui.library.LibraryViewModel
 import com.chmouel.liseur.ui.library.SeriesPickerSheet
 import com.chmouel.liseur.ui.library.SeriesScreen
-import com.chmouel.liseur.ui.library.LibraryViewModel
+import com.chmouel.liseur.ui.reading.FineTypographyActions
+import com.chmouel.liseur.ui.settings.AboutScreen
+import com.chmouel.liseur.ui.settings.AnnotationBackupUi
+import com.chmouel.liseur.ui.settings.HiddenBooksScreen
+import com.chmouel.liseur.ui.settings.LicencesScreen
+import com.chmouel.liseur.ui.settings.ReadingAppearanceScreen
+import com.chmouel.liseur.ui.settings.ReadingNavigationScreen
 import com.chmouel.liseur.ui.settings.ServerAccountScreen
 import com.chmouel.liseur.ui.settings.ServerAccountViewModel
-import com.chmouel.liseur.ui.settings.AboutScreen
-import com.chmouel.liseur.ui.settings.LicencesScreen
 import com.chmouel.liseur.ui.settings.SettingsScreen
-import com.chmouel.liseur.ui.settings.ReadingAppearanceScreen
-import com.chmouel.liseur.ui.settings.HiddenBooksScreen
-import com.chmouel.liseur.ui.settings.ReadingNavigationScreen
-import com.chmouel.liseur.ui.settings.AnnotationBackupUi
-import com.chmouel.liseur.ui.LocalEInk
-import com.chmouel.liseur.ui.ProvideEInk
-import com.chmouel.liseur.data.settings.AppSettings
-import com.chmouel.liseur.data.settings.ReaderPrefs
+import com.chmouel.liseur.ui.stats.BookReadingStatsScreen
+import com.chmouel.liseur.ui.stats.ReadingStatsScreen
+import com.chmouel.liseur.ui.stats.ReadingStatsViewModel
 import com.chmouel.liseur.ui.theme.LiseurTheme
 import com.chmouel.liseur.ui.theme.SystemBarIcons
 import com.chmouel.liseur.ui.theme.dynamicColorAvailable
 import com.chmouel.liseur.ui.theme.isDark
-import android.net.Uri
-import androidx.core.net.toUri
-import androidx.compose.runtime.collectAsState
-import com.chmouel.liseur.data.library.openableUri
-import com.chmouel.liseur.domain.SeriesShelf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -168,6 +190,9 @@ class MainActivity : ComponentActivity() {
 }
 
 private enum class Screen {
+    HOME,
+    BOOK_DETAIL,
+    APA_DEVICES,
     LIBRARY,
     SETTINGS,
     READING_APPEARANCE,
@@ -194,7 +219,12 @@ private const val SPONSOR_URL = "https://github.com/sponsors/chmouel"
 
 @Composable
 private fun LiseurApp(settings: AppSettings) {
-    var screen by rememberSaveable { mutableStateOf(Screen.LIBRARY) }
+    var screen by rememberSaveable {
+        mutableStateOf(if (ApaConfig.configured) Screen.HOME else Screen.LIBRARY)
+    }
+    // The APA book page shown by BOOK_DETAIL, and the tab Back returns to.
+    var detailBookId by rememberSaveable { mutableStateOf<String?>(null) }
+    var detailReturnsTo by rememberSaveable { mutableStateOf(Screen.HOME) }
     // The server screen is reached from two places now, and Back has to
     // go back to whichever one it was, not to the one it usually is.
     var accountReturnsTo by rememberSaveable { mutableStateOf(Screen.SETTINGS) }
@@ -210,7 +240,69 @@ private fun LiseurApp(settings: AppSettings) {
     val appIsDark = settings.themeMode.isDark()
     val annotationBackup = rememberAnnotationBackup()
 
+    // APA: with the cloud configured and no account yet, sign in first.
+    // Skipping keeps the app usable as a plain reader for local files.
+    var apaSkipped by rememberSaveable { mutableStateOf(false) }
+    val account by remember(context) {
+        context.container.remoteAccount.server.map { AccountPresence(it != null, ApaConfig.connectionOf(it) != null) }
+    }.collectAsStateWithLifecycle(initialValue = null)
+    val apaConnected = account?.apa == true
+    val signingIn = ApaConfig.configured && account?.any == false && !apaSkipped
+    // Only a reader who is not on the APA cloud, and not about to sign in
+    // to it, is moved off the APA-only screens.
+    LaunchedEffect(account, apaSkipped) {
+        if (account?.apa == false && !signingIn && screen in APA_ONLY_SCREENS) screen = Screen.LIBRARY
+    }
+    // Until the account is read, nothing is built: a Home created now
+    // would load for no account and keep that failure.
+    if (account == null) return
+    if (signingIn) {
+        ApaSignInScreen(
+            viewModel = viewModel(factory = SignInViewModel.Factory),
+            onSkip = { apaSkipped = true },
+        )
+        return
+    }
+
+    val showTabs = apaConnected && screen in TAB_SCREENS
+    Scaffold(
+        bottomBar = { if (showTabs) ApaTabs(screen) { screen = it } },
+        contentWindowInsets = WindowInsets(0),
+    ) { tabsPadding ->
+    Box(
+        Modifier
+            .padding(tabsPadding)
+            .consumeWindowInsets(tabsPadding),
+    ) {
     when (screen) {
+        Screen.HOME -> {
+            val home: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
+            ApaHomeScreen(
+                viewModel = home,
+                onOpenBook = { id ->
+                    detailBookId = id
+                    detailReturnsTo = Screen.HOME
+                    screen = Screen.BOOK_DETAIL
+                },
+                modifier = Modifier.statusBarsPadding(),
+            )
+        }
+
+        Screen.BOOK_DETAIL -> {
+            val id = detailBookId
+            if (id == null) {
+                LaunchedEffect(Unit) { screen = Screen.HOME }
+            } else {
+                val back = { screen = detailReturnsTo }
+                BackHandler { back() }
+                ApaBookDetailScreen(
+                    viewModel = viewModel(key = "book:$id", factory = BookDetailViewModel.factory(id)),
+                    onBack = back,
+                    onOpenBook = { other -> detailBookId = other },
+                )
+            }
+        }
+
         Screen.LIBRARY -> LibraryRoute(
             onOpenSettings = { screen = Screen.SETTINGS },
             onOpenStats = { screen = Screen.STATS },
@@ -223,6 +315,7 @@ private fun LiseurApp(settings: AppSettings) {
                 accountReturnsTo = Screen.LIBRARY
                 screen = Screen.SERVER_ACCOUNT
             },
+            onOpenStore = { screen = Screen.HOME },
         )
 
         Screen.STATS -> {
@@ -311,6 +404,7 @@ private fun LiseurApp(settings: AppSettings) {
                 backup = annotationBackup,
                 server = context.container.remoteAccount.server,
                 onOpenAbout = { screen = Screen.ABOUT },
+                onOpenDevices = { screen = Screen.APA_DEVICES },
                 onBack = { screen = Screen.LIBRARY },
             )
         }
@@ -397,6 +491,11 @@ private fun LiseurApp(settings: AppSettings) {
             )
         }
 
+        Screen.APA_DEVICES -> {
+            BackHandler { screen = Screen.SETTINGS }
+            ApaDevicesScreen(onBack = { screen = Screen.SETTINGS })
+        }
+
         Screen.SERVER_ACCOUNT -> {
             BackHandler { screen = accountReturnsTo }
             ServerAccountRoute(onBack = { screen = accountReturnsTo })
@@ -415,6 +514,31 @@ private fun LiseurApp(settings: AppSettings) {
         Screen.LICENCES -> {
             BackHandler { screen = Screen.ABOUT }
             LicencesScreen(onBack = { screen = Screen.ABOUT })
+        }
+    }
+    }
+    }
+}
+
+private data class AccountPresence(val any: Boolean, val apa: Boolean)
+
+private val TAB_SCREENS = setOf(Screen.HOME, Screen.LIBRARY, Screen.SETTINGS)
+private val APA_ONLY_SCREENS = setOf(Screen.HOME, Screen.BOOK_DETAIL, Screen.APA_DEVICES)
+
+@Composable
+private fun ApaTabs(current: Screen, onSelect: (Screen) -> Unit) {
+    NavigationBar {
+        listOf(
+            Triple(Screen.HOME, Icons.Default.Home, R.string.apa_tab_home),
+            Triple(Screen.LIBRARY, Icons.AutoMirrored.Filled.LibraryBooks, R.string.apa_tab_library),
+            Triple(Screen.SETTINGS, Icons.Default.Settings, R.string.apa_tab_settings),
+        ).forEach { (target, icon, label) ->
+            NavigationBarItem(
+                selected = current == target,
+                onClick = { onSelect(target) },
+                icon = { Icon(icon, contentDescription = null) },
+                label = { Text(stringResource(label)) },
+            )
         }
     }
 }
@@ -599,6 +723,7 @@ private fun LibraryRoute(
     onOpenStats: () -> Unit,
     onOpenBookStats: (com.chmouel.liseur.data.db.Book) -> Unit,
     onConnectServer: () -> Unit,
+    onOpenStore: () -> Unit,
     viewModel: LibraryViewModel = viewModel(factory = LibraryViewModel.Factory),
 ) {
     val context = LocalContext.current
@@ -894,6 +1019,7 @@ private fun LibraryRoute(
         onOpenStats = onOpenStats,
         onOpenBookStats = onOpenBookStats,
         onConnectServer = onConnectServer,
+        onOpenStore = onOpenStore,
         onStartWithFreeBooks = viewModel::connectStarterCatalog,
         freeBooksFailures = viewModel.starterCatalogFailures,
         freeBooksFallback = viewModel.starterCatalogFallback,

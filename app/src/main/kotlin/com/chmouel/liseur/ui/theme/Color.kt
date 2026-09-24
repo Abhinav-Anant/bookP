@@ -2,9 +2,9 @@ package com.chmouel.liseur.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// "Paper & ink" brand palette: white paper, dark ink, leather accents.
+// "Paper & ink" palette with Anant purple accents (the Brand* colours).
 //
-// Paper is white, as paper is. The warmth is in the ink and the leather,
+// Paper is white, as paper is. The warmth is in the ink and the accents,
 // where it belongs: a page tinted the colour of a page is one of those
 // things that looks charming for a second and grubby thereafter, and it
 // makes every photograph on it -- which is to say every book cover --
@@ -28,9 +28,9 @@ val Ink = Color(0xFF15110C)
 val InkSoft = Color(0xFF4A3F30)
 val InkInverse = Color(0xFF302B25)
 val PaperInverse = Color(0xFFF6F1EA)
-val Leather = Color(0xFF7A4A2B)
-val LeatherLight = Color(0xFFFFDCC3)
-val LeatherDark = Color(0xFF5C3018)
+val Brand = Color(0xFF6B3FA0)
+val BrandLight = Color(0xFFEBDDFF)
+val BrandDark = Color(0xFF3F1D6B)
 
 // The colour of "this one is chosen".
 //
@@ -39,10 +39,10 @@ val LeatherDark = Color(0xFF5C3018)
 // used for. It used to be sage, which made the one selected thing on a
 // screen the one green thing on it -- not a second accent so much as a
 // stray one, since nothing else anywhere was green. Selection now looks
-// like the app: leather, washed out enough to sit under dark text.
-val LeatherSoft = Color(0xFF8B5E3C)
-val LeatherWash = Color(0xFFF0DCC6)
-val LeatherInk = Color(0xFF4A2711)
+// like the app: the brand purple, washed out enough to sit under dark text.
+val BrandSoft = Color(0xFF7E5AA8)
+val BrandWash = Color(0xFFEADDF7)
+val BrandInk = Color(0xFF2E1450)
 
 val Teal = Color(0xFF3A5F5C)
 val TealLight = Color(0xFFBDECE6)
@@ -61,8 +61,8 @@ val NightText = Color(0xFFEBE1D0)
 val NightTextSoft = Color(0xFFCFC3B1)
 val NightRule = Color(0xFF4A4238)
 val NightRuleStrong = Color(0xFF988D7C)
-val LeatherNight = Color(0xFFE5A87C)
-val LeatherNightDeep = Color(0xFF4A3324)
+val BrandNight = Color(0xFFD0B3F5)
+val BrandNightDeep = Color(0xFF3E2A5C)
 val TealNight = Color(0xFFA2D3CD)
 val TealNightDeep = Color(0xFF2A4744)
 

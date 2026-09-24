@@ -1,0 +1,6 @@
+project_id = "apa"
+
+# The `api` function authenticates with per-device API keys (X-API-Key),
+# not Supabase JWTs, so the gateway must not demand one.
+[functions.api]
+verify_jwt = false

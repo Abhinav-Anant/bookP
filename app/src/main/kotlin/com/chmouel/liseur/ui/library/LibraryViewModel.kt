@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.chmouel.liseur.container
+import com.chmouel.liseur.data.apa.ApaConfig
 import com.chmouel.liseur.data.calibre.BookDownloadRepository
 import com.chmouel.liseur.data.remote.BookUploadRepository
 import com.chmouel.liseur.data.remote.UploadPrompts
@@ -272,6 +273,8 @@ data class LibraryUiState(
      * Downloaded filter would only ever say "all of them".
      */
     val hasServer: Boolean = false,
+    /** Connected to the APA cloud, which is what the Favourites filter needs. */
+    val hasApa: Boolean = false,
     /**
      * Whether the connected catalog is one the reader addresses
      * themselves, so "point at a single shelf" is advice they can act
@@ -358,6 +361,8 @@ class LibraryViewModel(
     private val seriesOrderDao: SeriesOrderDao,
     private val seriesExtras: SeriesExtrasRepository,
     private val refusals: UploadRefusalDao,
+    /** APA favourites, kept current by the Home and book pages. */
+    private val favorites: StateFlow<Set<String>> = MutableStateFlow(emptySet()),
 ) : ViewModel() {
 
     /**
@@ -599,6 +604,7 @@ class LibraryViewModel(
                 appSettings.catalogPartialDismissedFor,
                 catalog.starterMore,
                 catalog.starterMoreLoading,
+                favorites,
             ) { values -> values },
             _searchQuery,
             _isSearchActive,
@@ -634,6 +640,8 @@ class LibraryViewModel(
             val partialDismissedFor = baseValues[12] as String?
             val starterMore = baseValues[13] as StarterCatalogMoreState
             val starterMoreLoading = baseValues[14] as Boolean
+            @Suppress("UNCHECKED_CAST")
+            val favoriteIds = baseValues[15] as Set<String>
             val refused = refusedRows.filterValues { it.stillApplies }.keys
 
             val onTheShelf = books.filter { !it.archived }
@@ -667,6 +675,7 @@ class LibraryViewModel(
                         // view you are standing in, and takes the way
                         // back to it away with it.
                         LibraryFilterOption.ARCHIVED -> books.any { it.archived }
+                        LibraryFilterOption.FAVORITES -> ApaConfig.connectionOf(server) != null
                         else -> true
                     }
                 },
@@ -676,6 +685,7 @@ class LibraryViewModel(
                 groupBySeries = stored.groupBySeries &&
                     shelves.isNotEmpty() &&
                     LibraryFilterOption.ARCHIVED !in stored.options,
+                favoriteIds = favoriteIds,
             )
 
             val sortedBooks = books.arrangedBy(
@@ -785,6 +795,7 @@ class LibraryViewModel(
                 hasArchived = books.any { it.archived },
                 hasFinished = books.any { !it.archived && it.finished },
                 hasServer = server != null,
+                hasApa = ApaConfig.connectionOf(server) != null,
                 catalogIsAddressable = server?.kind == ServerKind.CUSTOM,
                 // Not an error and not retryable, so it is not folded
                 // into the failure notice: the shelf is real, there is
@@ -1543,6 +1554,7 @@ class LibraryViewModel(
                     seriesOrderDao = container.database.seriesOrderDao(),
                     seriesExtras = container.seriesExtras,
                     refusals = container.database.uploadRefusalDao(),
+                    favorites = container.apaFavorites,
                 )
             }
         }

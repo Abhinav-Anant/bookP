@@ -1,5 +1,7 @@
 package com.chmouel.liseur.ui.settings
 
+import androidx.compose.material.icons.outlined.PhoneAndroid
+import com.chmouel.liseur.data.apa.ApaConfig
 import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -85,6 +87,7 @@ fun SettingsScreen(
     backup: AnnotationBackupUi,
     server: Flow<RemoteServer?>,
     onOpenAbout: () -> Unit,
+    onOpenDevices: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -263,6 +266,14 @@ fun SettingsScreen(
                         } ?: stringResource(R.string.settings_account_detail),
                         onClick = onOpenAccount,
                     )
+                    if (ApaConfig.connectionOf(catalog) != null) {
+                        ConnectionRow(
+                            icon = { Icon(Icons.Outlined.PhoneAndroid, contentDescription = null) },
+                            title = stringResource(R.string.apa_devices),
+                            subtitle = stringResource(R.string.apa_devices_hint),
+                            onClick = onOpenDevices,
+                        )
+                    }
                 }
 
                 SettingsGroup(stringResource(R.string.settings_library)) {
