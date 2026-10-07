@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>APA Publisher Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="bar">
+    <a class="brand" href="#/"><span class="mark">∞</span> Anant Publisher Portal</a>
+    <nav id="nav"></nav>
+  </header>
+  <main id="view"><p class="muted">Loading…</p></main>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module">
+    import { start } from "./app.js";
+    import "./author.js";
+    import "./admin.js";
+    start();
+  </script>
+</body>
+</html>

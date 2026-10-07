@@ -1,0 +1,107 @@
+:root {
+  --brand: #6b3fa0;
+  --brand-light: #ebddff;
+  --brand-dark: #3f1d6b;
+  --gold: #f2c14e;
+  --bg: #f7f4fb;
+  --card: #ffffff;
+  --text: #1f1530;
+  --muted: #6b6478;
+  --line: #e2dbec;
+  --error: #b3261e;
+  --ok: #1e7b4a;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --brand: #d0b3f5;
+    --brand-light: #3e2a5c;
+    --brand-dark: #ebddff;
+    --bg: #15101d;
+    --card: #1f1829;
+    --text: #ece6f5;
+    --muted: #a59cb5;
+    --line: #3a3048;
+    --error: #ffb4ab;
+    --ok: #8fd9ad;
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", "Noto Sans", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+a { color: var(--brand); }
+h1 { font-size: 1.4rem; margin: 0 0 .75rem; }
+h2 { font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
+
+.bar {
+  display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; align-items: center;
+  padding: .75rem 16px; background: #6b3fa0; color: #fff;
+}
+.brand { color: #fff; font-weight: 600; text-decoration: none; font-size: 1.05rem; }
+.mark { color: var(--gold); font-size: 1.3rem; }
+#nav { display: flex; flex-wrap: wrap; gap: .25rem 1rem; align-items: center; }
+#nav a, #nav .link { color: #fff; opacity: .9; text-decoration: none; }
+#nav a:hover, #nav .link:hover { opacity: 1; text-decoration: underline; }
+
+main { max-width: 1000px; margin: 1.5rem auto; padding: 0 16px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+.narrow { max-width: 460px; margin-inline: auto; }
+.muted { color: var(--muted); }
+.error { color: var(--error); }
+.or { text-align: center; color: var(--muted); margin: .75rem 0; }
+
+form { display: grid; gap: .75rem; }
+.grid2 { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+label { display: grid; gap: .25rem; font-weight: 500; }
+label.check { display: flex; gap: .5rem; align-items: center; font-weight: 400; }
+input, textarea, select {
+  font: inherit; padding: .5rem .6rem; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--bg); color: var(--text); width: 100%;
+}
+label.check input { width: auto; }
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--brand); outline-offset: 2px;
+}
+
+button, .button {
+  font: inherit; display: inline-block; padding: .5rem 1rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--brand); background: transparent; color: var(--brand); text-decoration: none;
+}
+button.primary, .button.primary { background: var(--brand); color: var(--card); }
+button.danger { border-color: var(--error); color: var(--error); }
+button.link { border: 0; padding: 0; background: none; }
+button:disabled { opacity: .5; cursor: progress; }
+.actions { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: .85rem; color: var(--muted); font-weight: 500; }
+.scroll { overflow-x: auto; }
+
+.chip { display: inline-block; padding: .1rem .55rem; border-radius: 999px; font-size: .8rem; background: var(--brand-light); color: var(--brand-dark); }
+.chip.approved { background: #d7f3e3; color: #12553a; }
+.chip.rejected { background: #fde2df; color: #8c1d18; }
+.chip.pending { background: #fff1c9; color: #6b4e00; }
+
+.cover { width: 56px; aspect-ratio: 2/3; object-fit: cover; border-radius: 4px; background: var(--brand-light); }
+.cover.big { width: 120px; }
+
+.stats { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1rem; }
+.stat b { display: block; font-size: 1.6rem; color: var(--brand); }
+.bars { display: grid; gap: .35rem; }
+.bars div { display: grid; grid-template-columns: minmax(120px, 30%) 1fr 3rem; gap: .5rem; align-items: center; }
+.bars span.fill { height: .7rem; border-radius: 4px; background: var(--brand); }
+
+#toast {
+  position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%) translateY(200%);
+  background: var(--text); color: var(--bg); padding: .6rem 1rem; border-radius: 8px;
+  transition: transform .2s; max-width: calc(100% - 32px);
+}
+#toast.show { transform: translateX(-50%); }
+#toast.error { background: var(--error); color: #fff; }
