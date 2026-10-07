@@ -92,6 +92,8 @@ async function mintDevice(req: Request): Promise<Response> {
   if (!token) throw new HttpError(401, "missing session");
   const { data, error } = await db.auth.getUser(token);
   if (error || !data.user) throw new HttpError(401, "invalid session");
+  const profile = must(await db.from("profiles").select("blocked").eq("id", data.user.id).maybeSingle());
+  if (profile?.blocked) throw new HttpError(403, "account blocked");
   const body = await req.json().catch(() => ({}));
   const key = newDeviceKey();
   must(await db.from("devices").insert({
