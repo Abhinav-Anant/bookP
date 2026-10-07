@@ -58,7 +58,7 @@ jsdelivr, and Node's built-in test runner for the one pure-logic module.
 - `my_book_stats() → table(book_id, readers, downloads, finished)`
 - `admin_stats(days int default 30) → jsonb {users,new_users,active_users,books,top_books,top_authors,daily}`
 
-- [ ] **Step 1: Write the pgTAP tests (`supabase/tests/portal.sql`).** Fixtures:
+- [x] **Step 1: Write the pgTAP tests (`supabase/tests/portal.sql`).** Fixtures:
   - an admin, author A, author B and a reader;
   - A's draft, B's draft, and A's approved book.
 
@@ -77,16 +77,16 @@ jsdelivr, and Node's built-in test runner for the one pure-logic module.
     `authors` row;
   - `set_blocked` revokes devices, and `device_user` returns null for a
     blocked user's live key.
-- [ ] **Step 2: Run the tests and confirm they fail.** The columns and
+- [x] **Step 2: Run the tests and confirm they fail.** The columns and
   functions don't exist yet.
-- [ ] **Step 3: Write the migration** (the SQL is in the migration file:
+- [x] **Step 3: Write the migration** (the SQL is in the migration file:
   columns, `author_applications` with its RLS, `profiles_guard`,
   `books_guard`, the author book, file and storage policies,
   `device_user` with the blocked check, and the five functions).
-- [ ] **Step 4: Apply it** with `npx supabase db push --linked`. If the CLI asks
+- [x] **Step 4: Apply it** with `npx supabase db push --linked`. If the CLI asks
   for the DB password, the user runs it.
-- [ ] **Step 5: Run the tests, both suites green:** `portal.sql` and `rls.sql`.
-- [ ] **Step 6: Commit.**
+- [x] **Step 5: Run the tests, both suites green:** `portal.sql` and `rls.sql`.
+- [x] **Step 6: Commit.**
 
   `git commit -m "feat(db): author ownership, review workflow, blocking and stats"`
 
@@ -94,12 +94,12 @@ jsdelivr, and Node's built-in test runner for the one pure-logic module.
 
 **Files:** Modify `supabase/functions/api/index.ts`, in `mintDevice`.
 
-- [ ] Before inserting, read `profiles.blocked` for the user and throw
+- [x] Before inserting, read `profiles.blocked` for the user and throw
   `HttpError(403, "account blocked")` if it is set.
-- [ ] Deploy with `npx supabase functions deploy api --no-verify-jwt`.
+- [x] Deploy with `npx supabase functions deploy api --no-verify-jwt`.
   Then check that `curl` of `/api/v2/users/me` with no key still
   answers 401.
-- [ ] Commit: `fix(api): blocked accounts cannot mint device keys`.
+- [x] Commit: `fix(api): blocked accounts cannot mint device keys`.
 
 ### Task 3: Portal shell, sign-in and applying to publish
 
@@ -122,34 +122,34 @@ jsdelivr, and Node's built-in test runner for the one pure-logic module.
     `toast(msg, isError)`, `go(hash)`;
   - imports `author.js` and `admin.js`, which register their routes.
 
-- [ ] **Step 1:** write `lib.test.mjs` with `node:test` and `assert`.
+- [x] **Step 1:** write `lib.test.mjs` with `node:test` and `assert`.
   - `formatOf('A.EPUB') === 'epub'`; `'x.cbr'` gives null.
   - `parseGenres(' Poetry, ,Myth ')` gives `['Poetry','Myth']`.
   - `sha256Hex` of `"abc"` equals `ba7816bf…15ad`.
   - `escapeHtml('<a&">')`.
-- [ ] **Step 2:** `node --test portal/lib.test.mjs` fails, because there is no module.
-- [ ] **Step 3:** implement `lib.js`, then run `node --test portal/lib.test.mjs`: it passes.
-- [ ] **Step 4:** add the shell.
+- [x] **Step 2:** `node --test portal/lib.test.mjs` fails, because there is no module.
+- [x] **Step 3:** implement `lib.js`, then run `node --test portal/lib.test.mjs`: it passes.
+- [x] **Step 4:** add the shell.
   - Nav shows Home and My books, plus Admin when the user is an admin.
   - Sign-in is an email OTP form (code step), with Google through
     `signInWithOAuth({provider:'google', options:{redirectTo: location.origin + location.pathname}})`.
   - A blocked account sees a notice.
   - The reader landing shows the application form, or its status and
     rejection reason with "Apply again".
-- [ ] **Step 5:** serve locally with `npx serve portal -l 5500`. Sign in with
+- [x] **Step 5:** serve locally with `npx serve portal -l 5500`. Sign in with
   email OTP in the built-in browser and submit an application.
-- [ ] **Step 6:** commit: `feat(portal): shell, sign-in and author applications`.
+- [x] **Step 6:** commit: `feat(portal): shell, sign-in and author applications`.
 
 ### Task 4: Author: my books and the book editor
 
 **Files:** Create `portal/author.js`.
 
-- [ ] **`#/books`:**
+- [x] **`#/books`:**
   - a list of the caller's books (`books` where `owner_id = uid`)
     joined with `my_book_stats()`;
   - status chips and the rejection reason;
   - a "New book" button.
-- [ ] **`#/book/{id|new}`:** a form with every field in the spec.
+- [x] **`#/book/{id|new}`:** a form with every field in the spec.
   - The cover input shows a preview.
   - The file input reads the format with `formatOf`, and size and hash
     with `sha256Hex`.
@@ -163,54 +163,54 @@ jsdelivr, and Node's built-in test runner for the one pure-logic module.
     before the rows change).
   - Admins also see the Featured and Editor's pick toggles and a status
     select.
-- [ ] **Manual check:** create a draft with an EPUB, submit it, and see it
+- [x] **Manual check:** create a draft with an EPUB, submit it, and see it
   read-only as pending.
-- [ ] Commit: `feat(portal): author book list and editor`.
+- [x] Commit: `feat(portal): author book list and editor`.
 
 ### Task 5: Admin: review queue, books and authors
 
 **Files:** Create `portal/admin.js`.
 
-- [ ] **`#/admin` (review queue):**
+- [x] **`#/admin` (review queue):**
   - pending applications get Approve, or Reject with a prompted reason
     (through `review_author_application`);
   - pending books get Open (the editor), Approve (`status = 'approved'`,
     reason cleared), or Reject (`status = 'rejected'`,
     `rejection_reason`).
-- [ ] **`#/admin/books`:**
+- [x] **`#/admin/books`:**
   - search by title and filter by status;
   - Edit (the editor), Unpublish (back to draft) and Delete (with a
     confirm; also removes the storage objects).
-- [ ] **`#/admin/authors`:** edit the name, bio and photo URL inline.
-- [ ] **Manual check:** approve the Task 3 application and the Task 4 book.
+- [x] **`#/admin/authors`:** edit the name, bio and photo URL inline.
+- [x] **Manual check:** approve the Task 3 application and the Task 4 book.
   The book appears on the emulator's Home after a refresh.
-- [ ] Commit: `feat(portal): admin review queue, books and authors`.
+- [x] Commit: `feat(portal): admin review queue, books and authors`.
 
 ### Task 6: Admin: users and analytics
 
 **Files:** Modify `portal/admin.js`.
 
-- [ ] **`#/admin/users`:**
+- [x] **`#/admin/users`:**
   - search with `admin_users(q)`;
   - a role select (direct `profiles` update);
   - Block/Unblock with `set_blocked`;
   - "Grant book": pick an approved paid book, then insert an
     entitlement with source `grant`;
   - Devices: a list from `devices` with Revoke.
-- [ ] **`#/admin/stats`:** a 7/30/90 day picker over `admin_stats(days)`.
+- [x] **`#/admin/stats`:** a 7/30/90 day picker over `admin_stats(days)`.
   - Numbers for users, new users and active users.
   - Books by status.
   - Top books and top authors, as CSS bar lists.
   - Daily active readers.
-- [ ] **Manual check:** block and unblock a test user, and see their devices
+- [x] **Manual check:** block and unblock a test user, and see their devices
   revoked.
-- [ ] Commit: `feat(portal): admin users and analytics`.
+- [x] Commit: `feat(portal): admin users and analytics`.
 
 ### Task 7: Docs
 
 **Files:** Modify `docs/APA_SETUP.md`.
 
-- [ ] Replace "Publish a book (until the admin portal exists)" with a
+- [x] Replace "Publish a book (until the admin portal exists)" with a
   portal section:
   - running it locally;
   - hosting it on Netlify;
@@ -219,4 +219,4 @@ jsdelivr, and Node's built-in test runner for the one pure-logic module.
   - adding the Google web callback.
 
   Keep the SQL route as a fallback note.
-- [ ] Commit: `docs: publisher and admin portal setup`.
+- [x] Commit: `docs: publisher and admin portal setup`.

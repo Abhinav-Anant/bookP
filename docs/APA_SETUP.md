@@ -79,7 +79,49 @@ Then build:
 When `apa.supabaseUrl` is empty, the app behaves like plain Liseur: a
 local reader with no sign-in screen.
 
-## 4. Publish a book (until the admin portal exists)
+## 4. Publisher and admin portal
+
+`portal/` is a static web app: plain HTML and JavaScript, with no build
+step. Authors use it to apply, upload books and submit them. Admins use
+it to approve books, manage users and see analytics. All of its rules
+are enforced in the database (`supabase/migrations/20261007000000_portal.sql`).
+
+1. **Configure it.** Copy `portal/config.example.js` to `portal/config.js`,
+   which is gitignored. Fill in the project URL and the anon key.
+2. **Run it locally:** `python -m http.server 5500 --directory portal`, then
+   open http://localhost:5500.
+3. **Host it.** Drag the `portal/` folder (including `config.js`) onto
+   Netlify Drop, or use any other static host.
+4. **Make the first admin:**
+   `update profiles set role = 'admin' where id = (select id from auth.users where email = '…');`
+5. **Add the portal's address** to Supabase → Authentication → URL
+   Configuration → Redirect URLs, for example `http://localhost:5500`
+   and the hosted URL.
+6. **Google sign-in on the web.**
+   - In Google Cloud, add
+     `https://<project-ref>.supabase.co/auth/v1/callback` to the **Web**
+     client's authorized redirect URIs.
+   - Make sure the Supabase Google provider has the client secret.
+   - Email sign-in works without either step.
+
+**How a book gets published:**
+1. A reader signs in and applies.
+2. An admin approves the application under **Review**.
+3. The author adds a book with its cover and EPUB, PDF or CBZ file, then
+   submits it.
+4. The admin approves it, and it appears in every app at the next
+   refresh.
+
+Authors can edit only their own drafts and rejected books. Only admins
+can approve a book or feature it.
+
+**Blocking a user** (Users → Block) signs out all of their devices at
+once. They can't sign in a new device until they're unblocked.
+
+Run the database tests against the linked project (no Docker needed)
+with `bash supabase/tests/run-linked.sh supabase/tests/portal.sql`.
+
+### Publishing with SQL (fallback)
 
 1. **Author:** `insert into authors (name, bio) values (...)`.
 2. **Files:** upload the book file to the `books` bucket, for example
@@ -95,10 +137,10 @@ local reader with no sign-in screen.
 The book appears on Home in every app at the next refresh. No new APK
 is needed.
 
-**To give a user a paid book** (until payments exist), insert a row into
+**To give a user a paid book** (until payments exist), use Users → Grant book, or insert a row into
 `entitlements (user_id, book_id, source) values (..., ..., 'grant')`.
 
-**To sign a device out** (for example, a lost phone): set
+**To sign a device out** (for example, a lost phone): use Users → devices in the portal, or set
 `devices.revoked = true`. It gets a 401 on its next request.
 
 ## How books stay inside the app
