@@ -110,12 +110,14 @@ export async function render() {
 
 export function start() {
   window.addEventListener("hashchange", render);
-  // Supabase must not be called inside this callback, hence the timeout.
-  sb.auth.onAuthStateChange((event) => {
-    if (event === "SIGNED_IN" || event === "SIGNED_OUT") {
-      me = null;
-      setTimeout(render);
-    }
+  // SIGNED_IN also fires when the tab regains focus, so only a different user
+  // re-renders (a half-filled form must survive). Supabase must not be called
+  // inside this callback, hence the timeout.
+  let userId;
+  sb.auth.onAuthStateChange((_, session) => {
+    const next = session?.user.id ?? null;
+    if (userId !== undefined && next !== userId) setTimeout(render);
+    userId = next;
   });
   render();
 }
