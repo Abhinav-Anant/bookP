@@ -91,7 +91,9 @@ export async function render() {
     return show(view, h`<section class="card"><h1>Account blocked</h1>
       <p>This account has been blocked. Contact Anant Publication if you think this is a mistake.</p></section>`);
   }
-  const path = location.hash.slice(1) || "/";
+  // A magic-link sign-in lands with its tokens in the hash; that is the home page.
+  const hash = location.hash.slice(1);
+  const path = !hash || /^(access_token|error)=|&access_token=/.test(hash) ? "/" : hash;
   for (const r of routes) {
     const m = path.match(r.pattern);
     if (!m) continue;
@@ -129,12 +131,14 @@ function signIn(view) {
       <button class="primary">Send code</button>
     </form>
     <form id="code-form" hidden>
-      <label>6-digit code <input name="code" inputmode="numeric" pattern="[0-9]{6}" required autocomplete="one-time-code"></label>
+      <label>Code from the email <input name="code" inputmode="numeric" pattern="[0-9]{6,10}" required autocomplete="one-time-code"></label>
       <button class="primary">Sign in</button>
     </form>
     <div class="or">or</div>
     <button id="google">Continue with Google</button>
   </section>`);
+  const linkError = new URLSearchParams(location.hash.slice(1)).get("error_description");
+  if (linkError) toast(`${linkError}. Ask for a new code.`, true);
   const emailForm = view.querySelector("#email-form");
   const codeForm = view.querySelector("#code-form");
   let email = "";
