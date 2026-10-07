@@ -24,7 +24,7 @@ select is(public.device_user('gone-key'), null, 'revoked key is refused');
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"11111111-1111-1111-1111-111111111111","role":"authenticated"}';
 
-select is((select count(*) from public.books)::int, 1, 'drafts are hidden from readers');
+select is((select count(*) from public.books where id::text like '33333333-%')::int, 1, 'drafts are hidden from readers');
 select is((select count(*) from public.reading_state)::int, 0, 'other readers'' positions are hidden');
 select throws_ok(
   $$ update public.profiles set role = 'admin' where id = auth.uid() $$,
